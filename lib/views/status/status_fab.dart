@@ -1,0 +1,295 @@
+import 'package:flutter/material.dart';
+import 'package:istaff/views/status/status_form_viewmodel.dart';
+import 'package:provider/provider.dart';
+
+class StatusFAB extends StatelessWidget {
+  final List<dynamic> statuses;
+  // This constructor is not used in the current implementation, but can be useful for future enhancements.
+  // It allows passing a list of statuses if needed.
+  const StatusFAB({super.key, required this.statuses});
+
+  @override
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (_) => StatusFormViewModel(),
+      child: Consumer<StatusFormViewModel>(
+        builder: (context, vm, child) {
+          return FloatingActionButton(
+            onPressed: () => _showAddStatusModal(context, vm),
+            child: const Icon(Icons.add),
+          );
+        },
+      ),
+    );
+  }
+
+  void _showAddStatusModal(BuildContext context, StatusFormViewModel vm) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return AddStatusForm(statuses: statuses, vm: vm);
+      },
+    );
+  }
+}
+
+class AddStatusForm extends StatefulWidget {
+  final List<dynamic> statuses;
+   final StatusFormViewModel vm; 
+
+  const AddStatusForm({super.key, required this.statuses, required this.vm});
+
+  @override
+  State<AddStatusForm> createState() => _AddStatusFormState();
+}
+
+class _AddStatusFormState extends State<AddStatusForm> {
+  final _formKey = GlobalKey<FormState>();
+
+  String? selectedType;
+  DateTime? singleDate;
+  DateTimeRange? dateRange;
+  TimeOfDay? startTime;
+  TimeOfDay? endTime;
+  final notesController = TextEditingController();
+
+  // final List<String> statusTypes = ["Present", "Remote", "Absent", "On Leave"];
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+          left: 16,
+          right: 16,
+          top: 16,
+        ),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                "Add Status",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+
+              _buildStatusTypeDropdown(),
+              const SizedBox(height: 12),
+
+              _buildDateSection(),
+              const SizedBox(height: 20),
+
+              TextFormField(
+                controller: notesController,
+                decoration: const InputDecoration(labelText: 'Notes'),
+              ),
+              const SizedBox(height: 16),
+
+              ElevatedButton(
+                child: const Text("Submit"),
+                onPressed: () => widget.vm.submitForm(context),
+              ),
+              const SizedBox(height: 10),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatusTypeDropdown() {
+    return DropdownButtonFormField<String>(
+      decoration: const InputDecoration(labelText: "Status"),
+      items:
+          widget.statuses.map<DropdownMenuItem<String>>((status) {
+            return DropdownMenuItem<String>(
+              value: status['key'] as String,
+              child: Text(status['name']),
+            );
+          }).toList(),
+
+      onChanged: (value) {
+        setState(() {
+          selectedType = value;
+          _resetSelections();
+        });
+      },
+      validator: (value) => value == null ? 'Select a status type' : null,
+    );
+  }
+
+  Widget _buildDateSection() {
+    if (selectedType == null) return Container();
+
+    if (selectedType == '4JAM') {
+      return Column(
+        children: [
+          // _buildSingleDatePicker(),
+          if (selectedType == '4JAM') ...[
+            const SizedBox(height: 12),
+            _buildTimeRangePicker(),
+          ],
+        ],
+      );
+    } else {
+      return _buildDateRangePicker();
+    }
+  }
+
+  Widget _buildSingleDatePicker() {
+    return ElevatedButton.icon(
+      icon: const Icon(Icons.date_range),
+      label: Text(singleDate == null ? 'Pick Date' : _formatDate(singleDate!)),
+      onPressed: () async {
+        final picked = await showDatePicker(
+          context: context,
+          initialDate: singleDate ?? DateTime.now(),
+          firstDate: DateTime.now(), // prevent past date
+          lastDate: DateTime(2030),
+        );
+        if (picked != null) {
+          setState(() => singleDate = picked);
+        }
+      },
+    );
+  }
+
+  Widget _buildDateRangePicker() {
+    return ElevatedButton.icon(
+      icon: const Icon(Icons.date_range),
+      label: Text(
+        dateRange == null
+            ? 'Pick Date Range'
+            : '${_formatDate(dateRange!.start)} - ${_formatDate(dateRange!.end)}',
+      ),
+      onPressed: () async {
+        final picked = await showDateRangePicker(
+          context: context,
+          initialDateRange:
+              dateRange ??
+              DateTimeRange(
+                start: DateTime.now(),
+                end: DateTime.now().add(const Duration(days: 1)),
+              ),
+          firstDate: DateTime.now(), // prevent past date
+          lastDate: DateTime(2030),
+        );
+        if (picked != null) {
+          setState(() => dateRange = picked);
+        }
+      },
+    );
+  }
+
+  Widget _buildTimeRangePicker() {
+    return Row(
+      children: [
+        Expanded(
+          child: ElevatedButton.icon(
+            icon: const Icon(Icons.access_time),
+            label: Text(
+              startTime == null ? 'Start Time' : startTime!.format(context),
+            ),
+            onPressed: () async {
+              final picked = await showTimePicker(
+                context: context,
+                initialTime: startTime ?? TimeOfDay.now(),
+              );
+              if (picked != null) setState(() => startTime = picked);
+            },
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: ElevatedButton.icon(
+            icon: const Icon(Icons.access_time),
+            label: Text(
+              endTime == null ? 'End Time' : endTime!.format(context),
+            ),
+            onPressed: () async {
+              final picked = await showTimePicker(
+                context: context,
+                initialTime: endTime ?? TimeOfDay.now(),
+              );
+              if (picked != null) setState(() => endTime = picked);
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _handleSubmit() {
+    if (!_formKey.currentState!.validate()) return;
+
+    if ((selectedType == 'Present' || selectedType == 'Remote') &&
+        singleDate == null) {
+      _showSnack("Please select a date");
+      return;
+    }
+
+    if ((selectedType == 'Absent' || selectedType == 'On Leave') &&
+        dateRange == null) {
+      _showSnack("Please select a date range");
+      return;
+    }
+
+    if (selectedType == 'Remote') {
+      if (startTime == null || endTime == null) {
+        _showSnack("Please select start and end time");
+        return;
+      }
+
+      if (!_isTimeRangeValid()) {
+        _showSnack("End time must be after start time");
+        return;
+      }
+    }
+
+    Navigator.pop(context);
+
+    // ✅ Pass your final data here
+    final data = {
+      'type': selectedType,
+      'notes': notesController.text,
+      'singleDate': singleDate,
+      'dateRange': dateRange,
+      'startTime': startTime,
+      'endTime': endTime,
+    };
+
+    print(data);
+  }
+
+  bool _isTimeRangeValid() {
+    if (startTime == null || endTime == null) return false;
+
+    final start = DateTime(0, 0, 0, startTime!.hour, startTime!.minute);
+    final end = DateTime(0, 0, 0, endTime!.hour, endTime!.minute);
+    return end.isAfter(start);
+  }
+
+  void _resetSelections() {
+    singleDate = null;
+    dateRange = null;
+    startTime = null;
+    endTime = null;
+  }
+
+  String _formatDate(DateTime date) {
+    return "${date.day}/${date.month}/${date.year}";
+  }
+
+  void _showSnack(String message) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
+}
