@@ -31,7 +31,17 @@ class StatusFAB extends StatelessWidget {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
-        return AddStatusForm(statuses: statuses, vm: vm);
+        return ChangeNotifierProvider(
+          create: (_) => StatusFormViewModel(),
+          child : Consumer<StatusFormViewModel>(
+            builder: (context, vm, child) {
+              return AddStatusForm(
+                statuses: statuses,
+                vm: vm,
+              );
+            },
+          ),
+        );
       },
     );
   }
@@ -48,14 +58,14 @@ class AddStatusForm extends StatefulWidget {
 }
 
 class _AddStatusFormState extends State<AddStatusForm> {
-  final _formKey = GlobalKey<FormState>();
+  // final _formKey = GlobalKey<FormState>();
 
-  String? selectedType;
-  DateTime? singleDate;
-  DateTimeRange? dateRange;
-  TimeOfDay? startTime;
-  TimeOfDay? endTime;
-  final notesController = TextEditingController();
+  // String? selectedType;
+  // DateTime? singleDate;
+  // DateTimeRange? dateRange;
+  // TimeOfDay? startTime;
+  // TimeOfDay? endTime;
+  // final notesController = TextEditingController();
 
   // final List<String> statusTypes = ["Present", "Remote", "Absent", "On Leave"];
 
@@ -70,7 +80,7 @@ class _AddStatusFormState extends State<AddStatusForm> {
           top: 16,
         ),
         child: Form(
-          key: _formKey,
+          key: widget.vm.formKey,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -87,7 +97,7 @@ class _AddStatusFormState extends State<AddStatusForm> {
               const SizedBox(height: 20),
 
               TextFormField(
-                controller: notesController,
+                controller: widget.vm.notesController,
                 decoration: const InputDecoration(labelText: 'Notes'),
               ),
               const SizedBox(height: 16),
@@ -117,7 +127,7 @@ class _AddStatusFormState extends State<AddStatusForm> {
 
       onChanged: (value) {
         setState(() {
-          selectedType = value;
+          widget.vm.selectedType = value;
           _resetSelections();
         });
       },
@@ -126,13 +136,13 @@ class _AddStatusFormState extends State<AddStatusForm> {
   }
 
   Widget _buildDateSection() {
-    if (selectedType == null) return Container();
+    if (widget.vm.selectedType == null) return Container();
 
-    if (selectedType == '4JAM') {
+    if (widget.vm.selectedType == '4JAM') {
       return Column(
         children: [
           // _buildSingleDatePicker(),
-          if (selectedType == '4JAM') ...[
+          if (widget.vm.selectedType == '4JAM') ...[
             const SizedBox(height: 12),
             _buildTimeRangePicker(),
           ],
@@ -146,16 +156,16 @@ class _AddStatusFormState extends State<AddStatusForm> {
   Widget _buildSingleDatePicker() {
     return ElevatedButton.icon(
       icon: const Icon(Icons.date_range),
-      label: Text(singleDate == null ? 'Pick Date' : _formatDate(singleDate!)),
+      label: Text(widget.vm.singleDate == null ? 'Pick Date' : _formatDate(widget.vm.singleDate!)),
       onPressed: () async {
         final picked = await showDatePicker(
           context: context,
-          initialDate: singleDate ?? DateTime.now(),
+          initialDate: widget.vm.singleDate ?? DateTime.now(),
           firstDate: DateTime.now(), // prevent past date
           lastDate: DateTime(2030),
         );
         if (picked != null) {
-          setState(() => singleDate = picked);
+          setState(() => widget.vm.singleDate = picked);
         }
       },
     );
@@ -165,15 +175,15 @@ class _AddStatusFormState extends State<AddStatusForm> {
     return ElevatedButton.icon(
       icon: const Icon(Icons.date_range),
       label: Text(
-        dateRange == null
+        widget.vm.dateRange == null
             ? 'Pick Date Range'
-            : '${_formatDate(dateRange!.start)} - ${_formatDate(dateRange!.end)}',
+            : '${_formatDate(widget.vm.dateRange!.start)} - ${_formatDate(widget.vm.dateRange!.end)}',
       ),
       onPressed: () async {
         final picked = await showDateRangePicker(
           context: context,
           initialDateRange:
-              dateRange ??
+              widget.vm.dateRange ??
               DateTimeRange(
                 start: DateTime.now(),
                 end: DateTime.now().add(const Duration(days: 1)),
@@ -182,7 +192,7 @@ class _AddStatusFormState extends State<AddStatusForm> {
           lastDate: DateTime(2030),
         );
         if (picked != null) {
-          setState(() => dateRange = picked);
+          setState(() => widget.vm.dateRange = picked);
         }
       },
     );
@@ -195,14 +205,14 @@ class _AddStatusFormState extends State<AddStatusForm> {
           child: ElevatedButton.icon(
             icon: const Icon(Icons.access_time),
             label: Text(
-              startTime == null ? 'Start Time' : startTime!.format(context),
+              widget.vm.startTime == null ? 'Start Time' : widget.vm.startTime!.format(context),
             ),
             onPressed: () async {
               final picked = await showTimePicker(
                 context: context,
-                initialTime: startTime ?? TimeOfDay.now(),
+                initialTime: widget.vm.startTime ?? TimeOfDay.now(),
               );
-              if (picked != null) setState(() => startTime = picked);
+              if (picked != null) setState(() => widget.vm.startTime = picked);
             },
           ),
         ),
@@ -211,14 +221,14 @@ class _AddStatusFormState extends State<AddStatusForm> {
           child: ElevatedButton.icon(
             icon: const Icon(Icons.access_time),
             label: Text(
-              endTime == null ? 'End Time' : endTime!.format(context),
+              widget.vm.endTime == null ? 'End Time' : widget.vm.endTime!.format(context),
             ),
             onPressed: () async {
               final picked = await showTimePicker(
                 context: context,
-                initialTime: endTime ?? TimeOfDay.now(),
+                initialTime: widget.vm.endTime ?? TimeOfDay.now(),
               );
-              if (picked != null) setState(() => endTime = picked);
+              if (picked != null) setState(() => widget.vm.endTime = picked);
             },
           ),
         ),
@@ -226,61 +236,61 @@ class _AddStatusFormState extends State<AddStatusForm> {
     );
   }
 
-  void _handleSubmit() {
-    if (!_formKey.currentState!.validate()) return;
+  // void _handleSubmit() {
+  //   if (!_formKey.currentState!.validate()) return;
 
-    if ((selectedType == 'Present' || selectedType == 'Remote') &&
-        singleDate == null) {
-      _showSnack("Please select a date");
-      return;
-    }
+  //   if ((selectedType == 'Present' || selectedType == 'Remote') &&
+  //       singleDate == null) {
+  //     _showSnack("Please select a date");
+  //     return;
+  //   }
 
-    if ((selectedType == 'Absent' || selectedType == 'On Leave') &&
-        dateRange == null) {
-      _showSnack("Please select a date range");
-      return;
-    }
+  //   if ((selectedType == 'Absent' || selectedType == 'On Leave') &&
+  //       dateRange == null) {
+  //     _showSnack("Please select a date range");
+  //     return;
+  //   }
 
-    if (selectedType == 'Remote') {
-      if (startTime == null || endTime == null) {
-        _showSnack("Please select start and end time");
-        return;
-      }
+  //   if (selectedType == 'Remote') {
+  //     if (startTime == null || endTime == null) {
+  //       _showSnack("Please select start and end time");
+  //       return;
+  //     }
 
-      if (!_isTimeRangeValid()) {
-        _showSnack("End time must be after start time");
-        return;
-      }
-    }
+  //     if (!_isTimeRangeValid()) {
+  //       _showSnack("End time must be after start time");
+  //       return;
+  //     }
+  //   }
 
-    Navigator.pop(context);
+  //   Navigator.pop(context);
 
-    // ✅ Pass your final data here
-    final data = {
-      'type': selectedType,
-      'notes': notesController.text,
-      'singleDate': singleDate,
-      'dateRange': dateRange,
-      'startTime': startTime,
-      'endTime': endTime,
-    };
+  //   // ✅ Pass your final data here
+  //   final data = {
+  //     'type': selectedType,
+  //     'notes': notesController.text,
+  //     'singleDate': singleDate,
+  //     'dateRange': dateRange,
+  //     'startTime': startTime,
+  //     'endTime': endTime,
+  //   };
 
-    print(data);
-  }
+  //   print(data);
+  // }
 
   bool _isTimeRangeValid() {
-    if (startTime == null || endTime == null) return false;
+    if (widget.vm.startTime == null || widget.vm.endTime == null) return false;
 
-    final start = DateTime(0, 0, 0, startTime!.hour, startTime!.minute);
-    final end = DateTime(0, 0, 0, endTime!.hour, endTime!.minute);
+    final start = DateTime(0, 0, 0, widget.vm.startTime!.hour, widget.vm.startTime!.minute);
+    final end = DateTime(0, 0, 0, widget.vm.endTime!.hour, widget.vm.endTime!.minute);
     return end.isAfter(start);
   }
 
   void _resetSelections() {
-    singleDate = null;
-    dateRange = null;
-    startTime = null;
-    endTime = null;
+    widget.vm.singleDate = null;
+    widget.vm.dateRange = null;
+    widget.vm.startTime = null;
+    widget.vm.endTime = null;
   }
 
   String _formatDate(DateTime date) {

@@ -109,6 +109,8 @@ class StatusFormViewModel extends ChangeNotifier {
     endTime: endTime?.format(context),
   );
 
+  print("Submitting status: $status");
+
   try {
     await StatusRepository().submitStatus(status);
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Status submitted")));

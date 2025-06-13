@@ -11,6 +11,7 @@ class StatusRepository {
   }
 
   Future<void> submitStatus(StatusModel status) async {
+    print("Submitting status: ${status.toJson()}");
     await apiClient.post('/staff/status', status.toJson());
   }
 }
