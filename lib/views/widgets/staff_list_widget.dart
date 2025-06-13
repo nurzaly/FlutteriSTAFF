@@ -86,14 +86,14 @@ class StaffListWidget extends StatelessWidget {
                         ],
                       ],
                     ),
-                    // trailing: Text(
-                    //   item['extension_number'] ?? '',
-                    //   style: const TextStyle(
-                    //     color: Colors.green,
-                    //     fontWeight: FontWeight.bold,
-                    //     fontSize: 16.0,
-                    //   ),
-                    // ),
+                    trailing: Text(
+                      item['extension_number'] ?? '',
+                      style: const TextStyle(
+                        color: Colors.green,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16.0,
+                      ),
+                    ),
                   ),
                 );
               },
