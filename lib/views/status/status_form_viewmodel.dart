@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../data/models/status_model.dart';
 import '../../data/repositories/status_repository.dart';
 
-
 class StatusFormViewModel extends ChangeNotifier {
   final formKey = GlobalKey<FormState>();
   final notesController = TextEditingController();
@@ -51,12 +50,14 @@ class StatusFormViewModel extends ChangeNotifier {
   bool validateForm(BuildContext context) {
     if (!formKey.currentState!.validate()) return false;
 
-    if ((selectedType == 'Present' || selectedType == 'Remote') && singleDate == null) {
+    if ((selectedType == 'Present' || selectedType == 'Remote') &&
+        singleDate == null) {
       _showSnack(context, "Please select a date");
       return false;
     }
 
-    if ((selectedType == 'Absent' || selectedType == 'On Leave') && dateRange == null) {
+    if ((selectedType == 'Absent' || selectedType == 'On Leave') &&
+        dateRange == null) {
       _showSnack(context, "Please select a date range");
       return false;
     }
@@ -83,7 +84,9 @@ class StatusFormViewModel extends ChangeNotifier {
   }
 
   void _showSnack(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   Map<String, dynamic> getFormData() {
@@ -98,25 +101,29 @@ class StatusFormViewModel extends ChangeNotifier {
   }
 
   Future<void> submitForm(BuildContext context) async {
-  if (!validateForm(context)) return;
+    if (!validateForm(context)) return;
 
-  final status = StatusModel(
-    type: selectedType!,
-    notes: notesController.text,
-    startDate: singleDate ?? dateRange?.start ?? DateTime.now(),
-    endDate: selectedType == 'Remote' || selectedType == 'Present' ? null : dateRange?.end,
-    startTime: startTime?.format(context),
-    endTime: endTime?.format(context),
-  );
+    final status = StatusModel(
+      type: selectedType!,
+      notes: notesController.text,
+      startDate: singleDate ?? dateRange?.start ?? DateTime.now(),
+      endDate:
+          selectedType == 'Remote' || selectedType == 'Present'
+              ? null
+              : dateRange?.end,
+      startTime: startTime?.format(context),
+      endTime: endTime?.format(context),
+    );
 
-  print("Submitting status: $status");
-
-  try {
-    await StatusRepository().submitStatus(status);
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Status submitted")));
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+    try {
+      await StatusRepository().submitStatus(status);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Status submitted")));
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
+    }
   }
-}
-
 }

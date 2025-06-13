@@ -33,12 +33,9 @@ class StatusFAB extends StatelessWidget {
       builder: (context) {
         return ChangeNotifierProvider(
           create: (_) => StatusFormViewModel(),
-          child : Consumer<StatusFormViewModel>(
+          child: Consumer<StatusFormViewModel>(
             builder: (context, vm, child) {
-              return AddStatusForm(
-                statuses: statuses,
-                vm: vm,
-              );
+              return AddStatusForm(statuses: statuses, vm: vm);
             },
           ),
         );
@@ -49,7 +46,7 @@ class StatusFAB extends StatelessWidget {
 
 class AddStatusForm extends StatefulWidget {
   final List<dynamic> statuses;
-   final StatusFormViewModel vm; 
+  final StatusFormViewModel vm;
 
   const AddStatusForm({super.key, required this.statuses, required this.vm});
 
@@ -58,17 +55,6 @@ class AddStatusForm extends StatefulWidget {
 }
 
 class _AddStatusFormState extends State<AddStatusForm> {
-  // final _formKey = GlobalKey<FormState>();
-
-  // String? selectedType;
-  // DateTime? singleDate;
-  // DateTimeRange? dateRange;
-  // TimeOfDay? startTime;
-  // TimeOfDay? endTime;
-  // final notesController = TextEditingController();
-
-  // final List<String> statusTypes = ["Present", "Remote", "Absent", "On Leave"];
-
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -104,7 +90,10 @@ class _AddStatusFormState extends State<AddStatusForm> {
 
               ElevatedButton(
                 child: const Text("Submit"),
-                onPressed: () => widget.vm.submitForm(context),
+                onPressed: (){
+                  widget.vm.submitForm(context);
+                  
+                } 
               ),
               const SizedBox(height: 10),
             ],
@@ -156,7 +145,11 @@ class _AddStatusFormState extends State<AddStatusForm> {
   Widget _buildSingleDatePicker() {
     return ElevatedButton.icon(
       icon: const Icon(Icons.date_range),
-      label: Text(widget.vm.singleDate == null ? 'Pick Date' : _formatDate(widget.vm.singleDate!)),
+      label: Text(
+        widget.vm.singleDate == null
+            ? 'Pick Date'
+            : _formatDate(widget.vm.singleDate!),
+      ),
       onPressed: () async {
         final picked = await showDatePicker(
           context: context,
@@ -205,7 +198,9 @@ class _AddStatusFormState extends State<AddStatusForm> {
           child: ElevatedButton.icon(
             icon: const Icon(Icons.access_time),
             label: Text(
-              widget.vm.startTime == null ? 'Start Time' : widget.vm.startTime!.format(context),
+              widget.vm.startTime == null
+                  ? 'Start Time'
+                  : widget.vm.startTime!.format(context),
             ),
             onPressed: () async {
               final picked = await showTimePicker(
@@ -221,7 +216,9 @@ class _AddStatusFormState extends State<AddStatusForm> {
           child: ElevatedButton.icon(
             icon: const Icon(Icons.access_time),
             label: Text(
-              widget.vm.endTime == null ? 'End Time' : widget.vm.endTime!.format(context),
+              widget.vm.endTime == null
+                  ? 'End Time'
+                  : widget.vm.endTime!.format(context),
             ),
             onPressed: () async {
               final picked = await showTimePicker(
@@ -236,53 +233,23 @@ class _AddStatusFormState extends State<AddStatusForm> {
     );
   }
 
-  // void _handleSubmit() {
-  //   if (!_formKey.currentState!.validate()) return;
-
-  //   if ((selectedType == 'Present' || selectedType == 'Remote') &&
-  //       singleDate == null) {
-  //     _showSnack("Please select a date");
-  //     return;
-  //   }
-
-  //   if ((selectedType == 'Absent' || selectedType == 'On Leave') &&
-  //       dateRange == null) {
-  //     _showSnack("Please select a date range");
-  //     return;
-  //   }
-
-  //   if (selectedType == 'Remote') {
-  //     if (startTime == null || endTime == null) {
-  //       _showSnack("Please select start and end time");
-  //       return;
-  //     }
-
-  //     if (!_isTimeRangeValid()) {
-  //       _showSnack("End time must be after start time");
-  //       return;
-  //     }
-  //   }
-
-  //   Navigator.pop(context);
-
-  //   // ✅ Pass your final data here
-  //   final data = {
-  //     'type': selectedType,
-  //     'notes': notesController.text,
-  //     'singleDate': singleDate,
-  //     'dateRange': dateRange,
-  //     'startTime': startTime,
-  //     'endTime': endTime,
-  //   };
-
-  //   print(data);
-  // }
-
   bool _isTimeRangeValid() {
     if (widget.vm.startTime == null || widget.vm.endTime == null) return false;
 
-    final start = DateTime(0, 0, 0, widget.vm.startTime!.hour, widget.vm.startTime!.minute);
-    final end = DateTime(0, 0, 0, widget.vm.endTime!.hour, widget.vm.endTime!.minute);
+    final start = DateTime(
+      0,
+      0,
+      0,
+      widget.vm.startTime!.hour,
+      widget.vm.startTime!.minute,
+    );
+    final end = DateTime(
+      0,
+      0,
+      0,
+      widget.vm.endTime!.hour,
+      widget.vm.endTime!.minute,
+    );
     return end.isAfter(start);
   }
 
