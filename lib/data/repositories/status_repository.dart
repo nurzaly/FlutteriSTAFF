@@ -14,5 +14,6 @@ class StatusRepository {
     print("Submitting status: ${status.toJson()}");
     final data = await apiClient.post('/staff/status', status.toJson());
     print('Response : $data');
+    return data;
   }
 }

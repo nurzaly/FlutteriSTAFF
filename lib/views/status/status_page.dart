@@ -248,7 +248,7 @@ class _StatusPageState extends State<StatusPage> {
                   ),
                 ),
       ),
-      floatingActionButton: StatusFAB(statuses: statuses),
+      floatingActionButton: StatusFAB(statuses: statuses, isLoading: isLoadingStatus),
     );
   }
 }

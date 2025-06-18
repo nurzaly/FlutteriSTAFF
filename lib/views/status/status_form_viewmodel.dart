@@ -100,30 +100,40 @@ class StatusFormViewModel extends ChangeNotifier {
     };
   }
 
-  Future<void> submitForm(BuildContext context) async {
-    if (!validateForm(context)) return;
+Future<void> submitForm(BuildContext context, isLoading) async {
+  if (!validateForm(context)) return;
 
-    final status = StatusModel(
-      type: selectedType!,
-      notes: notesController.text,
-      startDate: singleDate ?? dateRange?.start ?? DateTime.now(),
-      endDate:
-          selectedType == 'Remote' || selectedType == 'Present'
-              ? null
-              : dateRange?.end,
-      startTime: startTime?.format(context),
-      endTime: endTime?.format(context),
+  isLoading = true;
+  notifyListeners();
+
+  final status = StatusModel(
+    type: selectedType!,
+    notes: notesController.text,
+    startDate: singleDate ?? dateRange?.start ?? DateTime.now(),
+    endDate: selectedType == 'Remote' || selectedType == 'Present'
+        ? null
+        : dateRange?.end,
+    startTime: startTime?.format(context),
+    endTime: endTime?.format(context),
+  );
+
+  try {
+    final data = await StatusRepository().submitStatus(status);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Status submitted")),
     );
 
-    try {
-      await StatusRepository().submitStatus(status);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Status submitted")));
-    } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.toString())));
-    }
+    Navigator.of(context).pop(); // Optional: close modal on success
+
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Submission failed: ${e.toString()}")),
+    );
+  } finally {
+    isLoading = false;
+    notifyListeners();
   }
+}
+
 }
