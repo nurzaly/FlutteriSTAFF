@@ -40,7 +40,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return ValueListenableBuilder(valueListenable: isDarkModeNotifier, builder: (builderContext, isDarkMode, child) {
       return MaterialApp(
-        title: 'Flutter Demo',
+        title: 'iSTAFF AGDSDK',
         theme: ThemeData(
           brightness: isDarkMode ? Brightness.dark : Brightness.light,
           primarySwatch: Colors.blue,

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:istaff/data/constants.dart' as constants;
+import 'package:istaff/data/repositories/status_repository.dart';
 import 'package:istaff/utils/status_utils.dart';
 import 'package:istaff/views/widgets/shimmer_widget.dart';
 import 'package:istaff/views/status/status_fab.dart';
@@ -33,7 +34,6 @@ class _StatusPageState extends State<StatusPage> {
     super.initState();
     fetchUserStatus();
     fetchStatus();
-    
   }
 
   Future<void> fetchStatus() async {
@@ -77,26 +77,18 @@ class _StatusPageState extends State<StatusPage> {
     final prefs = await SharedPreferences.getInstance();
 
     try {
-      final response = await http.get(
-        Uri.parse('${constants.apiBaseUrl}/staff/status?year=$selecteYear'),
-        headers: {
-          'Authorization':
-              'Bearer ${prefs.getString(constants.Kprefs.authTokenKey)}',
-        },
-      );
+      final data = await StatusRepository().fetchUserStatus(selecteYear!);
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        setState(() {
-          userStatuses = data['data'];
-        });
-      } else {
-        setState(() => errorLoadingUserStatus = true);
-      }
+      print('Fetched user statuses: $data');
+      userStatuses = data;
     } catch (e) {
+      print('Error fetching user status: $e');
       setState(() => errorLoadingUserStatus = true);
     } finally {
-      setState(() => isLoadingUserStatus = false);
+      setState(() {
+        isLoadingStatus = false;
+        isLoadingUserStatus = false;
+      });
     }
   }
 
@@ -119,16 +111,6 @@ class _StatusPageState extends State<StatusPage> {
     setState(() {
       selecteYear = DateTime.now().year.toString();
     });
-  }
-
-  void handleFABSubmit(Map<String, dynamic> formData) {
-    // Example: handle the data
-    print('Status: ${formData['type']}');
-    print('Notes: ${formData['notes']}');
-    print('From: ${formData['from']}');
-    print('To: ${formData['to']}');
-
-    // TODO: Add to list or call API, then refresh UI
   }
 
   @override
@@ -177,7 +159,7 @@ class _StatusPageState extends State<StatusPage> {
                           onChanged: (String? newValue) {
                             setState(() {
                               selecteYear = newValue!;
-                              fetchStatus();
+                              fetchUserStatus();
                             });
                           },
                         ),
@@ -200,18 +182,18 @@ class _StatusPageState extends State<StatusPage> {
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     border: Border.all(
-                                      color: StatusColor.getColor(item['key']),
+                                      color: StatusColor.getColor(item.type),
                                       width: 3.0,
                                     ),
                                   ),
                                   child: Icon(
-                                    StatusIcons.getStatusIcon(item['key']),
-                                    color: StatusColor.getColor(item['key']),
+                                    StatusIcons.getStatusIcon(item.type),
+                                    color: StatusColor.getColor(item.type),
                                     size: 40,
                                   ),
                                 ),
                                 title: Text(
-                                  item['name'],
+                                  item.name,
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -226,11 +208,11 @@ class _StatusPageState extends State<StatusPage> {
                                         color: Colors.grey,
                                       ),
                                     ),
-                                    if (item['notes'] != null &&
-                                        item['notes'].isNotEmpty) ...[
+                                    if (item.notes != null &&
+                                        item.notes.isNotEmpty) ...[
                                       const SizedBox(height: 4),
                                       Text(
-                                        item['notes'].toUpperCase(),
+                                        item.notes.toUpperCase(),
                                         style: const TextStyle(
                                           fontSize: 14.0,
                                           color: Colors.grey,
@@ -248,7 +230,11 @@ class _StatusPageState extends State<StatusPage> {
                   ),
                 ),
       ),
-      floatingActionButton: StatusFAB(statuses: statuses, isLoading: isLoadingStatus),
+      floatingActionButton: StatusFAB(
+        statuses: statuses,
+        isLoading: isLoadingStatus,
+        fetchUserStatus: fetchUserStatus
+      ),
     );
   }
 }

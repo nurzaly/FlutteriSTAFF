@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:istaff/data/models/status_model.dart';
 import 'package:istaff/utils/datetime_utils.dart';
 
 class StatusIcons {
@@ -7,7 +9,7 @@ class StatusIcons {
     'SAKIT': Icons.sick ,
     'RASMI': Icons.airplanemode_active ,
     'KURSUS': Icons.school,
-    '4JAM': Icons.access_time,
+    '4JAM': FontAwesomeIcons.personWalking,
     'KELOMPOK': Icons.child_friendly ,
     'BERTUGAS': Icons.work,
     'TIADA-STATUS': Icons.help_outline,
@@ -102,7 +104,25 @@ bool isCurrentTimeBetween(String startTime, String endTime) {
   }
 }
 
-String getStatusDateTimeText(Map<String, dynamic> item) {
+String getStatusDateTimeText(StatusModel item) {
+
+  if (item.type == '4JAM' && item.startTime != null && item.endTime != null) {
+    final time1 = formatTime(item.startTime.toString().replaceFirst('00:00', item.startTime ?? ''));
+    final time2 = formatTime(item.endTime.toString().replaceFirst('00:00', item.endTime ?? ''));
+    return '${formatDateDMYText(item.startDate.toString())} [ $time1 - $time2 ]';
+  }
+
+  if(item.endDate != null && item.startDate != item.endDate) {
+    return formatDateRange(item.startDate.toString(), item.endDate.toString());
+  } else {
+    return formatDateDMYText(item.startDate.toString());
+  }
+
+  return '';
+}
+
+
+String getStatusDateTimeText2(Map<String, dynamic> item) {
 
   if (item.isNotEmpty) {
     final dates = item['dates'] as Map?;

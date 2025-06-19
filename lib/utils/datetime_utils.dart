@@ -165,18 +165,17 @@ String formatDateRange(String dateStr1, String dateStr2) {
 
     final sameMonth = date1.month == date2.month && date1.year == date2.year;
 
+    final day1 = date1.day.toString().padLeft(2, '0');
+    final day2 = date2.day.toString().padLeft(2, '0');
+
     if (sameMonth) {
-      // Example: 1 - 5 Jun 2024
-      final day1 = date1.day;
-      final day2 = date2.day;
+      // Example: 01 - 05 Jun 2024
       final month = DateFormat.MMM().format(date1);
       final year = date1.year;
       return '$day1 - $day2 $month $year';
     } else {
-      // Example: 28 May - 2 Jun 2024
-      final day1 = date1.day;
+      // Example: 28 May - 02 Jun 2024
       final month1 = DateFormat.MMM().format(date1);
-      final day2 = date2.day;
       final month2 = DateFormat.MMM().format(date2);
       final year = date2.year;
       return '$day1 $month1 - $day2 $month2 $year';
@@ -186,11 +185,12 @@ String formatDateRange(String dateStr1, String dateStr2) {
   }
 }
 
+
 // Formats a date string to 'd MMM yyyy' format, e.g., '1 Jun 2024'.
 String formatDateDMYText(String dateStr) {
   try {
     final date = DateTime.parse(dateStr);
-    return DateFormat('d MMM yyyy').format(date);
+    return DateFormat('dd MMM yyyy').format(date); // Leading zero for day
   } catch (e) {
     return dateStr;
   }

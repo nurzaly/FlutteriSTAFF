@@ -5,6 +5,7 @@ import '../../data/repositories/status_repository.dart';
 class StatusFormViewModel extends ChangeNotifier {
   final formKey = GlobalKey<FormState>();
   final notesController = TextEditingController();
+  bool _disposed = false;
 
   String? selectedType;
   DateTime? singleDate;
@@ -12,7 +13,7 @@ class StatusFormViewModel extends ChangeNotifier {
   TimeOfDay? startTime;
   TimeOfDay? endTime;
 
-  final List<String> statusTypes = ["Present", "Remote", "Absent", "On Leave"];
+  // final List<String> statusTypes = ["Present", "Remote", "Absent", "On Leave"];
 
   void setType(String? value) {
     selectedType = value;
@@ -100,40 +101,58 @@ class StatusFormViewModel extends ChangeNotifier {
     };
   }
 
-Future<void> submitForm(BuildContext context, isLoading) async {
-  if (!validateForm(context)) return;
+  bool get isDisposed => _disposed;
 
-  isLoading = true;
-  notifyListeners();
-
-  final status = StatusModel(
-    type: selectedType!,
-    notes: notesController.text,
-    startDate: singleDate ?? dateRange?.start ?? DateTime.now(),
-    endDate: selectedType == 'Remote' || selectedType == 'Present'
-        ? null
-        : dateRange?.end,
-    startTime: startTime?.format(context),
-    endTime: endTime?.format(context),
-  );
-
-  try {
-    final data = await StatusRepository().submitStatus(status);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Status submitted")),
-    );
-
-    Navigator.of(context).pop(); // Optional: close modal on success
-
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Submission failed: ${e.toString()}")),
-    );
-  } finally {
-    isLoading = false;
-    notifyListeners();
+  @override
+  void dispose() {
+    _disposed = true;
+    notesController.dispose();
+    super.dispose();
   }
-}
 
+  Future<void> submitForm(
+    BuildContext context,
+    isLoading,
+    VoidCallback? onSubmitSuccess,
+  ) async {
+    if (!validateForm(context)) return;
+
+    isLoading = true;
+    notifyListeners();
+
+    final status = StatusModel(
+      type: selectedType!,
+      notes: notesController.text,
+      startDate: singleDate ?? dateRange?.start ?? DateTime.now(),
+      endDate: dateRange?.end,
+      startTime: startTime?.format(context),
+      endTime: endTime?.format(context),
+    );
+
+    try {
+      final data = await StatusRepository().submitStatus(status);
+
+      print('Data : $data');
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(data['message'])));
+      if (data['status'] == "success") {
+        Navigator.of(context).pop();
+        if (onSubmitSuccess != null) {
+          onSubmitSuccess();
+        }
+      } else {
+        Navigator.of(context).pop();
+      }
+      // close modal
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Submission failed: ${e.toString()}")),
+      );
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
 }

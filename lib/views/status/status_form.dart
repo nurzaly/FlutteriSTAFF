@@ -6,11 +6,12 @@ import 'widgets/date_range_picker_field.dart';
 import 'widgets/time_range_picker_field.dart';
 
 class StatusForm extends StatefulWidget {
+  final VoidCallback? onSubmitSuccess;
   final List statuses;
   final StatusFormViewModel vm;
   final isLoading;
 
-  const StatusForm({super.key, required this.statuses, required this.vm, required this.isLoading});
+  const StatusForm({super.key, required this.statuses, required this.vm, required this.isLoading, this.onSubmitSuccess});
 
   @override
   State<StatusForm> createState() => _StatusFormState();
@@ -223,8 +224,9 @@ class _StatusFormState extends State<StatusForm> {
                   ElevatedButton(
                     child: const Text("Submit"),
                     onPressed: () {
-                      widget.vm.submitForm(context, widget.vm.isLoading);
-                      Navigator.pop(context);
+                      widget.vm.submitForm(context, widget.isLoading, widget.onSubmitSuccess);
+                      // widget.onSubmitSuccess!();
+                      // Navigator.pop(context);
                     },
                   ),
                   const SizedBox(height: 10),
