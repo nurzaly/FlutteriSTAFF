@@ -62,7 +62,7 @@ class ApiClient {
   }
 
   dynamic _processResponse(http.Response response) {
-    _logResponse(response);
+     _logResponse(response);
 
     final jsonBody = jsonDecode(response.body);
     if (response.statusCode >= 200 && response.statusCode < 300) {

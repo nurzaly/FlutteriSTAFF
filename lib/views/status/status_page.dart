@@ -74,8 +74,6 @@ class _StatusPageState extends State<StatusPage> {
       errorLoadingStatus = false;
     });
 
-    final prefs = await SharedPreferences.getInstance();
-
     try {
       final data = await StatusRepository().fetchUserStatus(selecteYear!);
 
