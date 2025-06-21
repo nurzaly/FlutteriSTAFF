@@ -109,7 +109,7 @@ class _StaffPageState extends State<StaffPage>
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _tabController.animateTo(1);
+      _tabController.animateTo(0);
     });
   }
 
@@ -128,12 +128,44 @@ class _StaffPageState extends State<StaffPage>
           toolbarHeight: 5.0,
           bottom: TabBar(
             controller: _tabController,
-            tabs: const [Tab(text: 'UNIT'), Tab(text: 'KAKITANGAN')],
+            tabs: const [ Tab(text: 'KAKITANGAN'), Tab(text: 'UNIT')],
           ),
         ),
         body: TabBarView(
           controller: _tabController,
           children: [
+            // === KAKITANGAN TAB ===
+            AnimatedSwitcher(
+              duration: Duration(milliseconds: 500),
+              child:
+                  isLoadingStaff
+                      ? buildShimmerList()
+                      : errorLoadingStaff
+                      ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text("Failed to load staff."),
+                            const SizedBox(height: 12),
+                            ElevatedButton.icon(
+                              onPressed: fetchStaff,
+                              icon: Icon(Icons.refresh),
+                              label: Text("Retry"),
+                            ),
+                          ],
+                        ),
+                      )
+                      : StaffListWidget(
+                        staff: staff,
+                        filteredStaff: filteredStaff,
+                        clearFilter: () {
+                          setState(() {
+                            filteredStaff = staff; // Reset to show all staff
+                          });
+                        },
+                      ),
+            ),
+          
             // === UNIT TAB ===
             AnimatedSwitcher(
               duration: Duration(milliseconds: 500),
@@ -209,37 +241,7 @@ class _StaffPageState extends State<StaffPage>
                       ),
             ),
 
-            // === KAKITANGAN TAB ===
-            AnimatedSwitcher(
-              duration: Duration(milliseconds: 500),
-              child:
-                  isLoadingStaff
-                      ? buildShimmerList()
-                      : errorLoadingStaff
-                      ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text("Failed to load staff."),
-                            const SizedBox(height: 12),
-                            ElevatedButton.icon(
-                              onPressed: fetchStaff,
-                              icon: Icon(Icons.refresh),
-                              label: Text("Retry"),
-                            ),
-                          ],
-                        ),
-                      )
-                      : StaffListWidget(
-                        staff: staff,
-                        filteredStaff: filteredStaff,
-                        clearFilter: () {
-                          setState(() {
-                            filteredStaff = staff; // Reset to show all staff
-                          });
-                        },
-                      ),
-            ),
+            
           ],
         ),
       ),

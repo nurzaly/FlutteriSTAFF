@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 const String appName = 'Flutter App';
 const String appVersion = '1.0.0';
-// const String apiBaseUrl = 'https://istaff.agsdk.my/api';
-// const String baseUrl = 'https://istaff.agsdk.my';
-const String apiBaseUrl = 'http://10.0.2.2:8000/api';
-const String baseUrl = 'http://10.0.2.2:8000';
+const String apiBaseUrl = 'https://istaff.agsdk.my/api';
+const String baseUrl = 'https://istaff.agsdk.my';
+// const String apiBaseUrl = 'http://10.0.2.2:8000/api';
+// const String baseUrl = 'http://10.0.2.2:8000';
 // const String apiBaseUrl = 'http://127.0.0.1:8000/api';
 const String loginEndpoint = '/login';
 const String avatarPath = '$baseUrl/avatars/';

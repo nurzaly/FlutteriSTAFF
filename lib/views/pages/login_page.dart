@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:istaff/data/constants.dart' as constants;
@@ -99,8 +101,9 @@ class _LoginPageState extends State<LoginPage> {
           final token = data['token'];
           final name = data['user']['name'] ?? 'User Name Not Provided';
           final email = data['user']['email'] ?? 'Email not provided';
-          final avatarUrl = data['user']['avatar_url'] ?? 'Avatar Url not provided';
-          
+          final avatarUrl =
+              data['user']['avatar_url'] ?? 'Avatar Url not provided';
+
           await prefs.setString(constants.Kprefs.authTokenKey, token);
           await prefs.setString(constants.Kprefs.userNameKey, name);
           await prefs.setString(constants.Kprefs.userEmailKey, email);
@@ -122,9 +125,7 @@ class _LoginPageState extends State<LoginPage> {
               },
             ),
           );
-
-        }
-        else {
+        } else {
           _showDialog('Error', data['message'] ?? 'Login failed');
           _passwordController.clear();
         }
@@ -162,102 +163,127 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.all(24.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              children: [
-                // Logo placeholder
-                Container(
-                  width: 100,
-                  height: 100,
-                  color: Colors.grey[300],
-                  child: Center(child: Text("Logo")),
-                ),
-                SizedBox(height: 40),
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Background image
+          Image.asset('assets/images/bg.png', fit: BoxFit.cover),
 
-                // Email
-                TextFormField(
-                  controller: _emailController,
-                  decoration: InputDecoration(
-                    labelText: 'Email',
-                    border: OutlineInputBorder(),
-                  ),
-                  keyboardType: TextInputType.emailAddress,
-                  autofillHints: [AutofillHints.email],
-                  validator: (value) {
-                    if (value == null || value.isEmpty)
-                      return 'Email is required';
-                    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value))
-                      return 'Enter a valid email';
-                    return null;
-                  },
-                ),
-                SizedBox(height: 16),
-
-                // Password
-                TextFormField(
-                  controller: _passwordController,
-                  obscureText: _obscurePassword,
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    border: OutlineInputBorder(),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword
-                            ? Icons.visibility
-                            : Icons.visibility_off,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
-                      },
-                    ),
-                  ),
-                  autofillHints: [AutofillHints.password],
-                  validator: (value) {
-                    if (value == null || value.isEmpty)
-                      return 'Password is required';
-                    if (value.length < 6)
-                      return 'Password must be at least 6 characters';
-                    return null;
-                  },
-                ),
-                SizedBox(height: 16),
-
-                // Remember Me checkbox
-                Row(
-                  children: [
-                    Checkbox(
-                      value: _rememberMe,
-                      onChanged: (value) {
-                        setState(() {
-                          _rememberMe = value ?? false;
-                        });
-                      },
-                    ),
-                    Text("Remember Me"),
-                  ],
-                ),
-                SizedBox(height: 16),
-
-                // Login Button
-                _isLoading
-                    ? CircularProgressIndicator()
-                    : SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _login,
-                        child: Text('Login'),
-                      ),
-                    ),
-              ],
+          // Blur effect
+          BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Container(
+              color: Colors.black.withOpacity(0.2), // Optional dark overlay
             ),
           ),
-        ),
+
+          // Foreground content (login form)
+          Center(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.all(24.0),
+
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey[900]?.withOpacity(0.8),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.white.withOpacity(0.2)),
+                ),
+                padding: EdgeInsets.all(24),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Logo
+                      Image.asset(
+                        'assets/images/logo.png', // ✅ Make sure this file exists and is registered in pubspec.yaml
+                        width: 80,
+                        height: 80,
+                      ),
+                      SizedBox(height: 32),
+
+                      // Email
+                      TextFormField(
+                        controller: _emailController,
+                        decoration: InputDecoration(
+                          labelText: 'Email',
+                          filled: true,
+                          border: OutlineInputBorder(),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty)
+                            return 'Email is required';
+                          if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value))
+                            return 'Enter a valid email';
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: 16),
+
+                      // Password
+                      TextFormField(
+                        controller: _passwordController,
+                        obscureText: _obscurePassword,
+                        decoration: InputDecoration(
+                          labelText: 'Password',
+                          filled: true,
+                          border: OutlineInputBorder(),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              });
+                            },
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty)
+                            return 'Password is required';
+                          if (value.length < 6)
+                            return 'Password must be at least 6 characters';
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: 16),
+
+                      // Remember Me
+                      Row(
+                        children: [
+                          Checkbox(
+                            value: _rememberMe,
+                            onChanged: (value) {
+                              setState(() {
+                                _rememberMe = value ?? false;
+                              });
+                            },
+                          ),
+                          Text("Remember Me"),
+                        ],
+                      ),
+                      SizedBox(height: 16),
+
+                      // Login Button
+                      _isLoading
+                          ? CircularProgressIndicator()
+                          : SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: _login,
+                              child: Text('Login'),
+                            ),
+                          ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -60,7 +60,7 @@ class _ProfilePageState extends State<ProfilePage> {
       print('Logout error: $e');
     }
 
-    selectedPageNotifier.value = 0;
+    // selectedPageNotifier.value = 0;
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (_) => LoginPage()),

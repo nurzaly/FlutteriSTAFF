@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:istaff/data/constants.dart';
 import 'package:istaff/data/models/attendance_model.dart';
+import 'package:istaff/data/models/holiday_model.dart';
+import 'package:istaff/data/models/status_model.dart';
 import 'dart:convert';
 
 import 'package:istaff/data/repositories/attendance_repository.dart';
@@ -16,6 +19,9 @@ class AttendancePage extends StatefulWidget {
 class _AttendancePageState extends State<AttendancePage> {
   DateTime selectedMonth = DateTime(DateTime.now().year, DateTime.now().month);
   Map<String, Map<String, String>> attendanceMap = {}; // key: yyyy-MM-dd
+  List<Holiday> holidays = [];
+  List<StatusModel> statuses = [];
+  bool isLoadingAttendance = true;
 
   int totalPresent = 0;
   int totalAbsent = 0;
@@ -28,17 +34,15 @@ class _AttendancePageState extends State<AttendancePage> {
   }
 
   Future<void> _loadAttendanceData() async {
-    final url = Uri.parse(
-      'https://yourdomain.com/api/attendance',
-    ); // replace this URL
     try {
+      isLoadingAttendance = true;
       final data = await AttendanceRepository().fetchUserAttendances(
-        selectedMonth.month.toString(), // replace with selectedMonth.year and selectedMonth.month
+        selectedMonth.month
+            .toString(), // replace with selectedMonth.year and selectedMonth.month
       );
 
-      print('Selected month: ${selectedMonth.month.toString()}');
-
-      print('Fetched user statuses: $data');
+      holidays = data.holidays;
+      statuses = data.statuses;
 
       final Map<String, List<Attendance>> grouped = {};
 
@@ -93,6 +97,10 @@ class _AttendancePageState extends State<AttendancePage> {
       setState(() {});
     } catch (e) {
       print('API Error: $e');
+    } finally {
+      setState(() {
+        isLoadingAttendance = false;
+      });
     }
   }
 
@@ -125,148 +133,146 @@ class _AttendancePageState extends State<AttendancePage> {
     final daysInMonth = _getDaysInMonth(selectedMonth);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('User Attendance')),
-      body: Column(
-        children: [
-          _buildMonthDropdown(),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Card(
-              elevation: 2,
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _buildSummaryItem("Present", totalPresent, Colors.green),
-                    _buildSummaryItem("Late", totalLate, Colors.orange),
-                    _buildSummaryItem("Absent", totalAbsent, Colors.red),
-                  ],
-                ),
-              ),
-            ),
-          ),
+      // appBar: AppBar(title: const Text('User Attendance')),
+      body:
+          isLoadingAttendance
+              ? const Center(child: CircularProgressIndicator())
+              : Column(
+                children: [
+                  Container(child: _buildMonthDropdown()),
+                  // Padding(
+                  //   padding: const EdgeInsets.symmetric(
+                  //     horizontal: 16,
+                  //     vertical: 8,
+                  //   ),
+                  //   child: Card(
+                  //     elevation: 2,
+                  //     child: Padding(
+                  //       padding: const EdgeInsets.all(12),
+                  //       child: Row(
+                  //         mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  //         children: [
+                  //           _buildSummaryItem(
+                  //             "Present",
+                  //             totalPresent,
+                  //             Colors.green,
+                  //           ),
+                  //           _buildSummaryItem("Late", totalLate, Colors.orange),
+                  //           _buildSummaryItem(
+                  //             "Absent",
+                  //             totalAbsent,
+                  //             Colors.red,
+                  //           ),
+                  //         ],
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
 
-          Expanded(
-            child: ListView.builder(
-              itemCount: daysInMonth.length,
-              itemBuilder: (context, index) {
-                final day = daysInMonth[index];
-                final dayKey = DateFormat('yyyy-MM-dd').format(day);
-                final weekday = DateFormat('E').format(day); // e.g., Mon
-                final isWeekend =
-                    day.weekday == DateTime.saturday ||
-                    day.weekday == DateTime.sunday;
-                final data = attendanceMap[dayKey];
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: daysInMonth.length,
+                      itemBuilder: (context, index) {
+                        final day = daysInMonth[index];
+                        final dayKey = DateFormat('yyyy-MM-dd').format(day);
+                        final weekday = DateFormat(
+                          'E',
+                        ).format(day); // e.g., Mon
+                        final isWeekend =
+                            day.weekday == DateTime.saturday ||
+                            day.weekday == DateTime.sunday;
+                        final data = attendanceMap[dayKey];
 
-                final isLate =
-                    data != null &&
-                    data['checkIn'] != null &&
-                    DateFormat('HH:mm')
-                        .parse(data['checkIn']!)
-                        .isAfter(DateFormat('HH:mm').parse('09:01'));
+                        final holiday = getHolidayForDate(
+                          day.day,
+                          day.month,
+                          day.year,
+                        );
 
-                return Container(
-                  color: isWeekend ? Colors.pink : Colors.transparent,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  child: Card(
-                    elevation: 2,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Row(
-                        children: [
-                          // Left: Day in circle
-                          CircleAvatar(
-                            radius: 24,
-                            backgroundColor: Colors.blue.shade100,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  '${day.day}',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                        final isLate =
+                            data != null &&
+                            data['checkIn'] != null &&
+                            DateFormat('HH:mm')
+                                .parse(data['checkIn']!)
+                                .isAfter(DateFormat('HH:mm').parse('09:00'));
+
+                        return Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          child: Card(
+                            elevation: 2,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color:
+                                    holiday != null
+                                        ? Colors.pink[200]
+                                        : isWeekend
+                                        ? Colors.grey[600]
+                                        : Colors.transparent,
+                                borderRadius: BorderRadius.circular(
+                                  16,
+                                ), // Rounded corners
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: Row(
+                                  children: [
+                                    // Left: Day in circle
+                                    CircleAvatar(
+                                      backgroundColor:
+                                          isWeekend
+                                              ? Colors.grey[800]
+                                              : Colors.deepPurple,
+                                      radius: 24,
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            '${day.day}',
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          Text(
+                                            weekday,
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+
+                                    // Right side: Check-in/out info
+                                    Expanded(
+                                      child:
+                                          data == null
+                                              ? buildAbsentText(
+                                                day.day,
+                                                day.month,
+                                                day.year,
+                                                isWeekend,
+                                              )
+                                              : buildCheckInOut(data: data, isLate: isLate),
+                                    ),
+                                  ],
                                 ),
-                                Text(
-                                  weekday,
-                                  style: const TextStyle(fontSize: 12),
-                                ),
-                              ],
+                              ),
                             ),
                           ),
-                          const SizedBox(width: 16),
-
-                          // Right side: Check-in/out info
-                          Expanded(
-                            child:
-                                data == null
-                                    ? const Text(
-                                      'Absent',
-                                      style: TextStyle(
-                                        color: Colors.red,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    )
-                                    : Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            const Icon(
-                                              Icons.login,
-                                              size: 20,
-                                              color: Colors.green,
-                                            ),
-                                            const SizedBox(width: 6),
-                                            Text(
-                                              data['checkIn'] ?? '--:--',
-                                              style: TextStyle(
-                                                color:
-                                                    isLate
-                                                        ? Colors.red
-                                                        : Colors.green,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        Row(
-                                          children: [
-                                            const Icon(
-                                              Icons.logout,
-                                              size: 20,
-                                              color: Colors.orange,
-                                            ),
-                                            const SizedBox(width: 6),
-                                            Text(
-                                              data['checkOut'] ?? '--:--',
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                          ),
-                        ],
-                      ),
+                        );
+                      },
                     ),
                   ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
+                ],
+              ),
     );
   }
 
@@ -307,6 +313,146 @@ class _AttendancePageState extends State<AttendancePage> {
     return List.generate(
       lastDay.day,
       (i) => DateTime(month.year, month.month, i + 1),
+    );
+  }
+
+  String? getHolidayForDate(int day, int month, int year) {
+    DateTime givenDate = DateTime(year, month, day);
+
+    for (var holiday in holidays) {
+      DateTime holidayDate = DateTime.parse(holiday.date.toIso8601String());
+      if (holidayDate.year == givenDate.year &&
+          holidayDate.month == givenDate.month &&
+          holidayDate.day == givenDate.day) {
+        return holiday.name;
+      }
+    }
+
+    return null; // No match found
+  }
+
+  bool isBetween(DateTime givenDate, DateTime startDate, DateTime endDate) {
+    return (givenDate.isAtSameMomentAs(startDate) ||
+            givenDate.isAfter(startDate)) &&
+        (givenDate.isAtSameMomentAs(endDate) || givenDate.isBefore(endDate));
+  }
+
+  String? getStatusForDate(int day, int month, int year) {
+    DateTime givenDate = DateTime(year, month, day);
+
+    for (var status in statuses) {
+      // DateTime statusDate = DateTime.parse(status.date.toIso8601String());
+      if (status.endDate != null) {
+        if (isBetween(givenDate, status.startDate, status.endDate!)) {
+          return '${status.name!.toUpperCase()} - ${status.notes!.toUpperCase()}';
+        }
+      }
+      if (status.startDate != null &&
+          givenDate.isAtSameMomentAs(status.startDate)) {
+        return '${status.name!.toUpperCase()} - ${status.notes!.toUpperCase()}';
+      }
+    }
+
+    return null; // No match found
+  }
+
+  bool isBeforeOrEqualToday(int day, int month, int year) {
+    DateTime givenDate = DateTime(DateTime.now().year, month, day);
+    DateTime now = DateTime.now();
+    DateTime today = DateTime(now.year, now.month, now.day);
+
+    return givenDate.isBefore(today) || givenDate.isAtSameMomentAs(today);
+  }
+
+  Widget buildAbsentText(int day, int month, int year, bool isWeekend) {
+    final holiday = getHolidayForDate(day, month, year);
+    final status = getStatusForDate(day, month, year);
+
+    if (holiday != null) {
+      return Text(
+        holiday,
+        style: const TextStyle(color: Colors.pink, fontWeight: FontWeight.bold),
+      );
+    }
+    if (status != null) {
+      return Text(
+        status,
+        style: const TextStyle(color: Colors.pink, fontWeight: FontWeight.bold),
+      );
+    }
+
+    if (isBeforeOrEqualToday(day, month, year)) {
+      return Text(
+        isWeekend ? '' : 'Absent',
+        style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+      );
+    } else {
+      return const Text('', style: TextStyle());
+    }
+  }
+}
+
+class buildCheckInOut extends StatelessWidget {
+  const buildCheckInOut({
+    super.key,
+    required this.data,
+    required this.isLate,
+  });
+
+  final Map<String, String>? data;
+  final bool isLate;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment:
+          MainAxisAlignment
+              .spaceBetween,
+      children: [
+        Row(
+          children: [
+            const Icon(
+              Icons.login,
+              size: 20,
+              color: Colors.green,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              data?['checkIn'] ??
+                  '--:--',
+              style: TextStyle(
+                color:
+                    isLate
+                        ? Colors.red
+                        : Colors
+                            .green,
+                fontWeight:
+                    FontWeight.w600,
+                    fontSize: 24,
+              ),
+            ),
+          ],
+        ),
+        Row(
+          children: [
+            const Icon(
+              Icons.logout,
+              size: 20,
+              color: Colors.red,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              data?['checkOut'] ??
+                  '--:--',
+              style: const TextStyle(
+                fontWeight:
+                    FontWeight.w600,
+                fontSize: 24,
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
