@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:istaff/data/constants.dart' as constants;
 import 'package:istaff/views/pages/login_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:istaff/data/notifiers.dart';
 
 class UserProfilePage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -182,6 +183,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
       if (response.statusCode == 200) {
         print('Logout successful');
+        // selectedPageNotifier.value = 0;
       } else {
         print('Logout failed with status: ${response.statusCode}');
       }
