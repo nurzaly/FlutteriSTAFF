@@ -10,48 +10,88 @@ class UserProfilePage extends StatefulWidget {
 }
 
 class _UserProfilePageState extends State<UserProfilePage> {
-  bool isEditing = false;
-
-  late TextEditingController nameController;
-  late TextEditingController emailController;
-  late TextEditingController phoneController;
-  late TextEditingController extensionController;
+  late String name;
+  late String email;
+  late String phone;
+  late String extensionNumber;
 
   @override
   void initState() {
     super.initState();
-    nameController = TextEditingController(text: widget.userData['name']);
-    emailController = TextEditingController(text: widget.userData['email']);
-    phoneController = TextEditingController(text: widget.userData['phone']);
-    extensionController = TextEditingController(
-      text: widget.userData['extension_number'],
+    name = widget.userData['name'];
+    email = widget.userData['email'];
+    phone = widget.userData['phone'];
+    extensionNumber = widget.userData['extension_number'];
+  }
+
+  void showEditProfileDialog() {
+    final nameController = TextEditingController(text: name);
+    final emailController = TextEditingController(text: email);
+    final phoneController = TextEditingController(text: phone);
+    final extController = TextEditingController(text: extensionNumber);
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Edit Profile'),
+          content: SingleChildScrollView(
+            child: Column(
+              children: [
+                TextField(
+                  controller: nameController,
+                  decoration: const InputDecoration(labelText: 'Name'),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: emailController,
+                  decoration: const InputDecoration(labelText: 'Email'),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: phoneController,
+                  decoration: const InputDecoration(labelText: 'Phone'),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: extController,
+                  decoration: const InputDecoration(labelText: 'Extension Number'),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  name = nameController.text;
+                  email = emailController.text;
+                  phone = phoneController.text;
+                  extensionNumber = extController.text;
+                });
+
+                print('Updated Profile:');
+                print({
+                  'name': name,
+                  'email': email,
+                  'phone': phone,
+                  'extension_number': extensionNumber,
+                });
+
+                // TODO: Call update profile API here
+
+                Navigator.pop(context);
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
     );
-  }
-
-  @override
-  void dispose() {
-    nameController.dispose();
-    emailController.dispose();
-    phoneController.dispose();
-    extensionController.dispose();
-    super.dispose();
-  }
-
-  void updateProfile() {
-    final updatedData = {
-      'name': nameController.text,
-      'email': emailController.text,
-      'phone': phoneController.text,
-      'extension_number': extensionController.text,
-    };
-
-    print('Updated user data: $updatedData');
-
-    // You can call your API here
-
-    setState(() {
-      isEditing = false;
-    });
   }
 
   void showChangePasswordDialog() {
@@ -70,9 +110,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 TextField(
                   controller: currentPasswordController,
                   obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Current Password',
-                  ),
+                  decoration: const InputDecoration(labelText: 'Current Password'),
                 ),
                 const SizedBox(height: 12),
                 TextField(
@@ -84,9 +122,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 TextField(
                   controller: confirmPasswordController,
                   obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Confirm Password',
-                  ),
+                  decoration: const InputDecoration(labelText: 'Confirm Password'),
                 ),
               ],
             ),
@@ -98,23 +134,18 @@ class _UserProfilePageState extends State<UserProfilePage> {
             ),
             ElevatedButton(
               onPressed: () {
-                final current = currentPasswordController.text;
                 final newPass = newPasswordController.text;
                 final confirm = confirmPasswordController.text;
 
                 if (newPass != confirm) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'New password and confirmation do not match.',
-                      ),
-                    ),
+                    const SnackBar(content: Text('Passwords do not match.')),
                   );
                   return;
                 }
 
-                print('Change password: $current → $newPass');
-                // TODO: Call password update API here
+                print('Password changed!');
+                // TODO: Call change password API here
 
                 Navigator.pop(context);
               },
@@ -132,61 +163,54 @@ class _UserProfilePageState extends State<UserProfilePage> {
     final avatarUrl = 'https://your-api.com/storage/${user['avatar_url']}';
 
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('User Profile'),
+      ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            CircleAvatar(radius: 50, backgroundImage: NetworkImage(avatarUrl)),
-            const SizedBox(height: 16),
-            buildTextField('Name', nameController),
-            buildTextField('Email', emailController),
-            buildTextField('Phone', phoneController),
-            buildTextField('Extension Number', extensionController),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                ElevatedButton.icon(
-                  onPressed: () {
-                    if (isEditing) {
-                      updateProfile();
-                    } else {
-                      setState(() => isEditing = true);
-                    }
-                  },
-                  icon: Icon(isEditing ? Icons.save : Icons.edit),
-                  label: Text(isEditing ? 'Save Profile' : 'Edit Profile'),
-                ),
-                const SizedBox(height: 12),
-                ElevatedButton.icon(
-                  onPressed: showChangePasswordDialog,
-                  icon: const Icon(Icons.lock),
-                  label: const Text('Change Password'),
-                ),
-                
-                
-              ],
+            CircleAvatar(
+              radius: 50,
+              backgroundImage: NetworkImage(avatarUrl),
             ),
-
             const SizedBox(height: 16),
-            
+            readOnlyField('Name', name),
+            readOnlyField('Email', email),
+            readOnlyField('Phone', phone),
+            readOnlyField('Extension Number', extensionNumber),
+            const SizedBox(height: 12),
+            ElevatedButton.icon(
+              onPressed: showChangePasswordDialog,
+              icon: const Icon(Icons.lock),
+              label: const Text('Change Password'),
+            ),
+            const SizedBox(height: 12),
+            ElevatedButton.icon(
+              onPressed: showEditProfileDialog,
+              icon: const Icon(Icons.edit),
+              label: const Text('Edit Profile'),
+            ),
+            const SizedBox(height: 16),
+            if (user['role'] != null)
+              Wrap(
+                spacing: 8,
+                children: List<Widget>.from(
+                  user['role'].map((role) => Chip(label: Text(role))),
+                ),
+              ),
           ],
         ),
       ),
     );
   }
 
-  Widget buildTextField(
-    String label,
-    TextEditingController controller, {
-    bool obscure = false,
-  }) {
+  Widget readOnlyField(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: TextField(
-        controller: controller,
-        readOnly: !isEditing,
-        obscureText: obscure,
+        controller: TextEditingController(text: value),
+        readOnly: true,
         decoration: InputDecoration(
           labelText: label,
           border: const OutlineInputBorder(),
