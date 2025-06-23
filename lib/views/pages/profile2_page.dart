@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:istaff/data/constants.dart' as constants;
+import 'package:istaff/views/pages/login_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class UserProfilePage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -55,7 +59,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 const SizedBox(height: 12),
                 TextField(
                   controller: extController,
-                  decoration: const InputDecoration(labelText: 'Extension Number'),
+                  decoration: const InputDecoration(
+                    labelText: 'Extension Number',
+                  ),
                 ),
               ],
             ),
@@ -110,7 +116,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 TextField(
                   controller: currentPasswordController,
                   obscureText: true,
-                  decoration: const InputDecoration(labelText: 'Current Password'),
+                  decoration: const InputDecoration(
+                    labelText: 'Current Password',
+                  ),
                 ),
                 const SizedBox(height: 12),
                 TextField(
@@ -122,7 +130,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 TextField(
                   controller: confirmPasswordController,
                   obscureText: true,
-                  decoration: const InputDecoration(labelText: 'Confirm Password'),
+                  decoration: const InputDecoration(
+                    labelText: 'Confirm Password',
+                  ),
                 ),
               ],
             ),
@@ -157,23 +167,58 @@ class _UserProfilePageState extends State<UserProfilePage> {
     );
   }
 
+  Future<void> handleLogout(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // Optional: Call your backend logout endpoint here
+    try {
+      final response = await http.post(
+        Uri.parse(constants.apiBaseUrl + '/logout'),
+        headers: {
+          'Authorization':
+              'Bearer ${prefs.getString(constants.Kprefs.authTokenKey)}',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        print('Logout successful');
+      } else {
+        print('Logout failed with status: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Logout error: $e');
+    }
+
+    // selectedPageNotifier.value = 0;
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => LoginPage()),
+      (route) => false,
+    );
+
+    await prefs.remove(constants.Kprefs.authTokenKey);
+    await prefs.remove(constants.Kprefs.userNameKey);
+    await prefs.remove(constants.Kprefs.userEmailKey);
+    await prefs.remove(constants.Kprefs.userAvatarUrlKey);
+    // Optionally remove saved credentials
+    // await prefs.remove('saved_email');
+    // await prefs.remove('saved_password');
+
+    // Navigate back to login
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = widget.userData;
     final avatarUrl = 'https://your-api.com/storage/${user['avatar_url']}';
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('User Profile'),
-      ),
+      appBar: AppBar(title: const Text('User Profile')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            CircleAvatar(
-              radius: 50,
-              backgroundImage: NetworkImage(avatarUrl),
-            ),
+            CircleAvatar(radius: 50, backgroundImage: NetworkImage(avatarUrl)),
             const SizedBox(height: 16),
             readOnlyField('Name', name),
             readOnlyField('Email', email),
@@ -192,13 +237,35 @@ class _UserProfilePageState extends State<UserProfilePage> {
               label: const Text('Edit Profile'),
             ),
             const SizedBox(height: 16),
-            if (user['role'] != null)
-              Wrap(
-                spacing: 8,
-                children: List<Widget>.from(
-                  user['role'].map((role) => Chip(label: Text(role))),
-                ),
-              ),
+
+            ElevatedButton.icon(
+              onPressed: () async {
+                final shouldLogout = await showDialog<bool>(
+                  context: context,
+                  builder:
+                      (context) => AlertDialog(
+                        title: const Text('Logout'),
+                        content: const Text('Are you sure you want to logout?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, false),
+                            child: const Text('Cancel'),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, true),
+                            child: const Text('Logout'),
+                          ),
+                        ],
+                      ),
+                );
+                if (shouldLogout == true) {
+                  await handleLogout(context);
+                }
+              },
+              icon: const Icon(Icons.edit),
+              label: const Text('Logout'),
+            ),
+            const SizedBox(height: 16),
           ],
         ),
       ),
