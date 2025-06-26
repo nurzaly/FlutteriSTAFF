@@ -22,7 +22,17 @@ class ApiClient {
     final fullHeaders = await _buildHeaders(headers);
 
     _logRequest('GET', uri, headers: fullHeaders);
+    
     final response = await http.get(uri, headers: fullHeaders);
+
+    _logResponse(response);
+
+    final decodedBody = jsonDecode(response.body);
+
+    if (decodedBody['message'] == 'Unauthenticated') {
+      throw Exception('Unauthorized. Token may have expired.');
+    }
+    
     return _processResponse(response);
   }
 

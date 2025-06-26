@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:istaff/data/constants.dart' as constants;
+import 'package:istaff/data/repositories/dashboard_repository.dart';
 import 'package:istaff/utils/datetime_utils.dart';
 import 'package:istaff/views/widgets/dashboard_status_widget.dart';
 import 'package:istaff/views/widgets/today_attendance_widget.dart';
@@ -32,43 +33,40 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     fetchDashboardAttendance();
-    fetchDashboardStatus();
+    // fetchDashboardStatus();
   }
 
   Future<void> fetchDashboardAttendance() async {
     final url = Uri.parse('${constants.apiBaseUrl}/dashboard/attendance');
     final prefs = await SharedPreferences.getInstance();
     try {
-      final response = await http.get(
-        url,
-        headers: {
-          'Authorization':
-              'Bearer ${prefs.getString(constants.Kprefs.authTokenKey)}',
-        },
-      );
-      if (response.statusCode == 200) {
-        // Handle successful response
-        // Example: print(response.body);
-        final data = jsonDecode(response.body)['data'];
+      final data = await DashboardRepository().fetchUserStatus();
 
-        checkinout[0] =
-            data.isNotEmpty
-                ? formatDateTimeTo12Hour(data[0]['checktime']) ?? '00:00'
-                : '00:00';
+      print(data);
 
-        checkinout[1] =
-            data.isNotEmpty ? getSahKeluar(data[0]['checktime']) : '00:00';
+      // if (response.statusCode == 200) {
+      //   // Handle successful response
+      //   // Example: print(response.body);
+      //   final data = jsonDecode(response.body)['data'];
 
-        if (data.isNotEmpty && data.length >= 2) {
-          checkinout[2] =
-              formatDateTimeTo12Hour(data.last['checktime']) ?? '00:00';
-        } else {
-          checkinout[2] = '00:00';
-        }
-      } else {
-        // Handle error response
-        print('Error: ${response.statusCode}');
-      }
+      //   checkinout[0] =
+      //       data.isNotEmpty
+      //           ? formatDateTimeTo12Hour(data[0]['checktime']) ?? '00:00'
+      //           : '00:00';
+
+      //   checkinout[1] =
+      //       data.isNotEmpty ? getSahKeluar(data[0]['checktime']) : '00:00';
+
+      //   if (data.isNotEmpty && data.length >= 2) {
+      //     checkinout[2] =
+      //         formatDateTimeTo12Hour(data.last['checktime']) ?? '00:00';
+      //   } else {
+      //     checkinout[2] = '00:00';
+      //   }
+      // } else {
+      //   // Handle error response
+      //   print('Error: ${response.statusCode}');
+      // }
     } catch (e) {
       // Handle network or parsing errors
       print('Exception: $e');
