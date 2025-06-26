@@ -5,7 +5,7 @@ class DashboardRepository {
   final ApiClient apiClient = ApiClient();
 
   Future<List<StatusModel>> fetchUserStatus() async {
-    final response = await apiClient.get('/dashboard/status');
+    final response = await apiClient.get('/dashboard/attendance');
     final data = response['data'] as List;
     return data.map((json) => StatusModel.fromJson(json)).toList();
   }

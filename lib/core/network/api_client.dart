@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:istaff/views/pages/login_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:istaff/data/constants.dart' as constants;
 
@@ -12,6 +14,7 @@ class ApiClient {
 
     return {
       'Content-Type': 'application/json',
+      'Accept': 'application/json',
       'Authorization': 'Bearer $token',
       ...?customHeaders,
     };
@@ -27,11 +30,12 @@ class ApiClient {
 
     _logResponse(response);
 
-    final decodedBody = jsonDecode(response.body);
+    // final decodedBody = jsonDecode(response.body);
 
-    if (decodedBody['message'] == 'Unauthenticated') {
-      throw Exception('Unauthorized. Token may have expired.');
-    }
+    // if (decodedBody['message'] == 'Unauthenticated') {
+
+    //   throw Exception('Unauthorized. Token may have expired.');
+    // }
     
     return _processResponse(response);
   }
@@ -94,4 +98,5 @@ class ApiClient {
   void _logResponse(http.Response response) {
     print('📥 Response [${response.statusCode}]: ${response.body}');
   }
+
 }
