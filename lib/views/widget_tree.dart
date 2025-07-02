@@ -3,22 +3,14 @@ import 'package:istaff/data/notifiers.dart';
 import 'package:istaff/views/pages/attendance_page.dart';
 import 'package:istaff/views/pages/home_page.dart';
 import 'package:istaff/views/pages/profile2_page.dart';
+import 'package:istaff/views/pages/profile_page3.dart';
 import 'package:istaff/views/pages/setting_page.dart';
 import 'package:istaff/views/pages/staff_page.dart';
 import 'package:istaff/views/status/status_page.dart';
 import 'package:istaff/views/widgets/navbar_widget.dart';
 import 'package:istaff/views/pages/profile_page.dart';
 
-List<Widget> pages = [HomePage(), StaffPage(), StatusPage(), AttendancePage(), UserProfilePage(userData: {
-        "id": 21,
-        "name": "Nurzaly Bin Abd Rahman",
-        "email": "nurzaly@anm.gov.my",
-        "phone": "0123456789",
-        "extension_number": "208",
-        "unit": 10,
-        "role": ["superadmin"],
-        "avatar_url": "nurzaly-bin-abd-rahman-1739713305.png"
-      })];
+List<Widget> pages = [HomePage(), StaffPage(), StatusPage(), AttendancePage(), UserProfilePage3()];
 
 class WidgetTree extends StatelessWidget {
   const WidgetTree({super.key});
