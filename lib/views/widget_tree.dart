@@ -6,6 +6,7 @@ import 'package:istaff/views/pages/profile2_page.dart';
 import 'package:istaff/views/pages/profile_page3.dart';
 import 'package:istaff/views/pages/setting_page.dart';
 import 'package:istaff/views/pages/staff_page.dart';
+import 'package:istaff/views/pages/user_profile_page4.dart';
 import 'package:istaff/views/status/status_page.dart';
 import 'package:istaff/views/widgets/navbar_widget.dart';
 import 'package:istaff/views/pages/profile_page.dart';

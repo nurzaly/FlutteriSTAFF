@@ -6,15 +6,19 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:istaff/data/notifiers.dart';
 
 class UserProfilePage extends StatefulWidget {
-  final Map<String, dynamic> userData;
+  
 
-  const UserProfilePage({Key? key, required this.userData}) : super(key: key);
+  const UserProfilePage({super.key});
 
   @override
   State<UserProfilePage> createState() => _UserProfilePageState();
 }
 
 class _UserProfilePageState extends State<UserProfilePage> {
+  
+
+  late final Map<String, dynamic> userData;
+  
   late String name;
   late String email;
   late String phone;
@@ -23,13 +27,14 @@ class _UserProfilePageState extends State<UserProfilePage> {
   @override
   void initState() {
     super.initState();
-    name = widget.userData['name'];
-    email = widget.userData['email'];
-    phone = widget.userData['phone'];
-    extensionNumber = widget.userData['extension_number'];
+    name = userData['name'];
+    email = userData['email'];
+    phone = userData['phone'];
+    extensionNumber = userData['extension_number'];
   }
 
   void showEditProfileDialog() {
+
     final nameController = TextEditingController(text: name);
     final emailController = TextEditingController(text: email);
     final phoneController = TextEditingController(text: phone);
@@ -211,11 +216,10 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    final user = widget.userData;
+    final user = userData;
     final avatarUrl = 'https://your-api.com/storage/${user['avatar_url']}';
 
     return Scaffold(
-      appBar: AppBar(title: const Text('User Profile')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
