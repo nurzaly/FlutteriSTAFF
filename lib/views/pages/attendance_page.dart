@@ -198,13 +198,13 @@ class _AttendancePageState extends State<AttendancePage> {
 
                         return Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
+                            horizontal: 4,
+                            vertical: 1,
                           ),
                           child: Card(
                             elevation: 2,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(4),
                             ),
                             child: Container(
                               decoration: BoxDecoration(
@@ -215,11 +215,11 @@ class _AttendancePageState extends State<AttendancePage> {
                                         ? Colors.grey[600]
                                         : Colors.transparent,
                                 borderRadius: BorderRadius.circular(
-                                  16,
+                                  8,
                                 ), // Rounded corners
                               ),
                               child: Padding(
-                                padding: const EdgeInsets.all(12.0),
+                                padding: const EdgeInsets.all(6.0),
                                 child: Row(
                                   children: [
                                     // Left: Day in circle
@@ -237,6 +237,7 @@ class _AttendancePageState extends State<AttendancePage> {
                                             '${day.day}',
                                             style: const TextStyle(
                                               fontWeight: FontWeight.bold,
+                                              fontSize: 16,
                                             ),
                                           ),
                                           Text(
