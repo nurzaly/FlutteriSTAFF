@@ -60,7 +60,6 @@ class TodayAttendanceWidget extends StatelessWidget {
                                 getHourFrom12HourTime(checkinout[index]),
                                 style: GoogleFonts.robotoCondensed(
                                   fontSize: 70,
-                                  fontWeight: FontWeight.bold,
                                   height: 0.8,
                                 ),
                               ),
@@ -68,7 +67,6 @@ class TodayAttendanceWidget extends StatelessWidget {
                                 getMinuteFrom12HourTime(checkinout[index]),
                                 style: const TextStyle(
                                   fontSize: 60,
-                                  fontWeight: FontWeight.w500,
                                   height: 0.8,
                                 ),
                               ),
@@ -76,7 +74,6 @@ class TodayAttendanceWidget extends StatelessWidget {
                                 getAmPmFrom12HourTime(checkinout[index]),
                                 style: TextStyle(
                                   fontSize: 40,
-                                  fontWeight: FontWeight.w400,
                                   color: Colors.grey[700],
                                   height: 0.8,
                                 ),

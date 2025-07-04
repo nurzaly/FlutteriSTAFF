@@ -6,8 +6,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:istaff/data/notifiers.dart';
 
 class UserProfilePage extends StatefulWidget {
-  
-
   const UserProfilePage({super.key});
 
   @override
@@ -15,10 +13,8 @@ class UserProfilePage extends StatefulWidget {
 }
 
 class _UserProfilePageState extends State<UserProfilePage> {
-  
-
   late final Map<String, dynamic> userData;
-  
+
   late String name;
   late String email;
   late String phone;
@@ -34,7 +30,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
   }
 
   void showEditProfileDialog() {
-
     final nameController = TextEditingController(text: name);
     final emailController = TextEditingController(text: email);
     final phoneController = TextEditingController(text: phone);

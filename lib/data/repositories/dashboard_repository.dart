@@ -4,10 +4,16 @@ import '../models/status_model.dart';
 class DashboardRepository {
   final ApiClient apiClient = ApiClient();
 
-  Future<List<StatusModel>> fetchUserStatus() async {
+  Future<List<Map<String, dynamic>>> fetchUserStatus() async {
     final response = await apiClient.get('/dashboard/attendance');
     final data = response['data'] as List;
-    return data.map((json) => StatusModel.fromJson(json)).toList();
+    return data.map((item) => item as Map<String, dynamic>).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> fetchCountUserStatus() async {
+    final response = await apiClient.get('/dashboard/status');
+    final data = response['data'] as List;
+    return data.map((item) => item as Map<String, dynamic>).toList();
   }
 
   Future<Map<String, dynamic>> submitStatus(StatusModel status) async {
