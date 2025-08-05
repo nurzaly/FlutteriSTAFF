@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:istaff/data/constants.dart';
 import 'package:istaff/data/models/attendance_model.dart';
 import 'package:istaff/data/models/holiday_model.dart';
 import 'package:istaff/data/models/status_model.dart';
-import 'dart:convert';
 
 import 'package:istaff/data/repositories/attendance_repository.dart';
 
 class AttendancePage extends StatefulWidget {
-  const AttendancePage({Key? key}) : super(key: key);
+  const AttendancePage({super.key});
 
   @override
   State<AttendancePage> createState() => _AttendancePageState();
@@ -348,8 +345,7 @@ class _AttendancePageState extends State<AttendancePage> {
           return '${status.name!.toUpperCase()} - ${status.notes!.toUpperCase()}';
         }
       }
-      if (status.startDate != null &&
-          givenDate.isAtSameMomentAs(status.startDate)) {
+      if (givenDate.isAtSameMomentAs(status.startDate)) {
         return '${status.name!.toUpperCase()} - ${status.notes!.toUpperCase()}';
       }
     }

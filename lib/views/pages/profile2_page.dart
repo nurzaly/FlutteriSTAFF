@@ -3,7 +3,6 @@ import 'package:http/http.dart' as http;
 import 'package:istaff/data/constants.dart' as constants;
 import 'package:istaff/views/pages/login_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:istaff/data/notifiers.dart';
 
 class UserProfilePage extends StatefulWidget {
   const UserProfilePage({super.key});
@@ -174,7 +173,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
     // Optional: Call your backend logout endpoint here
     try {
       final response = await http.post(
-        Uri.parse(constants.apiBaseUrl + '/logout'),
+        Uri.parse('${constants.apiBaseUrl}/logout'),
         headers: {
           'Authorization':
               'Bearer ${prefs.getString(constants.Kprefs.authTokenKey)}',

@@ -3,12 +3,13 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:istaff/data/constants.dart' as constants;
-import 'package:istaff/views/pages/home_page.dart';
 import 'package:istaff/views/widget_tree.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
   @override
   _LoginPageState createState() => _LoginPageState();
 }
@@ -211,10 +212,12 @@ class _LoginPageState extends State<LoginPage> {
                           border: OutlineInputBorder(),
                         ),
                         validator: (value) {
-                          if (value == null || value.isEmpty)
+                          if (value == null || value.isEmpty) {
                             return 'Email is required';
-                          if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value))
+                          }
+                          if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
                             return 'Enter a valid email';
+                          }
                           return null;
                         },
                       ),
@@ -242,10 +245,12 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ),
                         validator: (value) {
-                          if (value == null || value.isEmpty)
+                          if (value == null || value.isEmpty) {
                             return 'Password is required';
-                          if (value.length < 6)
+                          }
+                          if (value.length < 6) {
                             return 'Password must be at least 6 characters';
+                          }
                           return null;
                         },
                       ),

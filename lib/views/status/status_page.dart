@@ -83,7 +83,7 @@ class _StatusPageState extends State<StatusPage> {
       print('Error fetching user status: $e');
       setState(() => errorLoadingUserStatus = true);
     } finally {
-      setState(() {
+       setState(() {
         isLoadingStatus = false;
         isLoadingUserStatus = false;
       });

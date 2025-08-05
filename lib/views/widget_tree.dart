@@ -4,7 +4,6 @@ import 'package:istaff/views/pages/attendance_page.dart';
 import 'package:istaff/views/pages/home_page.dart';
 
 import 'package:istaff/views/pages/profile_page3.dart';
-import 'package:istaff/views/pages/setting_page.dart';
 import 'package:istaff/views/pages/staff_page.dart';
 
 import 'package:istaff/views/status/status_page.dart';
@@ -38,19 +37,19 @@ class WidgetTree extends StatelessWidget {
               isDarkModeNotifier.value = !isDarkModeNotifier.value;
             },
           ),
-          IconButton(
-            icon: Icon(Icons.settings),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) {
-                    return SettingPage();
-                  },
-                ),
-              );
-            },
-          ),
+          // IconButton(
+          //   icon: Icon(Icons.settings),
+          //   onPressed: () {
+          //     Navigator.push(
+          //       context,
+          //       MaterialPageRoute(
+          //         builder: (context) {
+          //           return SettingPage();
+          //         },
+          //       ),
+          //     );
+          //   },
+          // ),
         ],
       ),
       body: ValueListenableBuilder(

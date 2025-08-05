@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:istaff/data/constants.dart' as constants;
-import 'package:istaff/data/notifiers.dart';
 import 'package:istaff/views/pages/login_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -44,7 +43,7 @@ class _ProfilePageState extends State<ProfilePage> {
     // Optional: Call your backend logout endpoint here
     try {
       final response = await http.post(
-        Uri.parse(constants.apiBaseUrl + '/logout'),
+        Uri.parse('${constants.apiBaseUrl}/logout'),
         headers: {
           'Authorization':
               'Bearer ${prefs.getString(constants.Kprefs.authTokenKey)}',
@@ -85,7 +84,7 @@ class _ProfilePageState extends State<ProfilePage> {
     }
     return Padding(
       padding: const EdgeInsets.all(16.0),
-      child: Container(
+      child: SizedBox(
         width: double.infinity,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -106,7 +105,7 @@ class _ProfilePageState extends State<ProfilePage> {
             SizedBox(height: 10),
             TextButton(
               style: ButtonStyle(
-                foregroundColor: MaterialStateProperty.all<Color>(Colors.blue),
+                foregroundColor: WidgetStateProperty.all<Color>(Colors.blue),
               ),
               onPressed: () async {
                 final shouldLogout = await showDialog<bool>(

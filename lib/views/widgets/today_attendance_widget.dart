@@ -10,11 +10,11 @@ class TodayAttendanceWidget extends StatelessWidget {
   var checkinoutTitle;
 
   TodayAttendanceWidget({
-    Key? key,
+    super.key,
     required this.checkinout,
     required this.checkinoutTitle,
     required this.isLoading,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +82,6 @@ class TodayAttendanceWidget extends StatelessWidget {
                           ),
                         ),
                       );
-                      ;
                     }),
                   ),
             ],

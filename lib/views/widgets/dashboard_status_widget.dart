@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:istaff/data/notifiers.dart';
 import 'package:istaff/utils/status_utils.dart';
 import 'package:istaff/views/pages/staff_list_page.dart';
-import 'package:istaff/views/widgets/shimmer_widget.dart';
 
 class DashboardStatusWidget extends StatelessWidget {
   final bool isLoading;
@@ -12,11 +10,11 @@ class DashboardStatusWidget extends StatelessWidget {
   final dynamic statuses;
 
   const DashboardStatusWidget({
-    Key? key,
+    super.key,
     required this.isLoading,
     required this.errorLoadingUnits,
     required this.statuses,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
