@@ -76,6 +76,11 @@ class _HomePageState extends State<HomePage> {
     } catch (e) {
       // Handle network or parsing errors
       print('Exception: $e');
+      if (e.toString().contains('Unauthorized')) {
+        // ...existing code...
+        await AuthHelper.handleUnauthorizedAccess(context);
+        // ...existing code...
+      }
     } finally {
       setState(() {
         _isLoadingStatus = false;
