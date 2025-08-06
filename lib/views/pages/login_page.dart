@@ -28,8 +28,8 @@ class _LoginPageState extends State<LoginPage> {
     super.initState();
     _checkLoginStatus();
     // Set initial value for easier testing
-    _emailController.text = 'nurzaly@anm.gov.my';
-    _passwordController.text = 'secret';
+    // _emailController.text = 'nurzaly@anm.gov.my';
+    // _passwordController.text = 'secret';
   }
 
   Future<void> _checkLoginStatus() async {
